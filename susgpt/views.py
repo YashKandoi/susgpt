@@ -28,20 +28,28 @@ def extract_links(content):
 def scrape_website(url):
     try:
         headers = { "X-With-Generated-Alt": "true",
-                   "X-With-Links-Summary": "true",
-                   "X-With-Images-Summary": "true"
+                    "X-With-Links-Summary": "true",
+                    "X-With-Images-Summary": "true",
+                    "X-No-Cache": "true",
+                    "X-Target-Selector": "#img-content",
+                    "X-Wait-For-Selector": "#content"
                      }
         # Layer 1 response
         response = requests.get("https://r.jina.ai/" + url, headers=headers)
         response.raise_for_status()  # Check if the request was successful
         links = extract_links(response.text)
-        output=""
+        output=response.text + "\n"
         # extract the name of the company from the url, Example: http://neufin.com, output: neufin
         company_name = url.split("//")[1].split(".")[0]
+        company_name = company_name.lower()
+        # if company name more than 1 letter add - in between words
+        company_name2=""
+        if len(company_name) > 1:
+            company_name2 = company_name.replace(" ", "-")
         # Layer 2 response
-        headers = {"X-With-Generated-Alt": "true"}
+        # headers = {"X-With-Generated-Alt": "true"}
         for link in links:
-            if company_name in link:
+            if (company_name) in link or (company_name2) in link:
                 response = requests.get("https://r.jina.ai/" + link, headers=headers)
                 response.raise_for_status()
                 output += response.text + "\n"
@@ -52,12 +60,12 @@ def scrape_website(url):
 
 
 @api_view(['GET','POST'])
-def Website_List(request):
+def Website_List(request,format=None):
 
     if request.method == 'GET':
         websites = Website.objects.all()
         serializer = WebsiteSerializer(websites, many=True)
-        return JsonResponse(serializer.data, safe=False)
+        return Response(serializer.data)
 
     elif request.method == 'POST':
         serializer = WebsiteSerializer(data=request.data)
@@ -68,7 +76,7 @@ def Website_List(request):
 
 
 @api_view(['GET','PUT','DELETE'])
-def Website_Detail(request, company_name):
+def Website_Detail(request, company_name,format=None):
     try:    
         website = Website.objects.get(company_name=company_name)
     except Website.DoesNotExist:

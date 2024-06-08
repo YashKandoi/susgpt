@@ -16,9 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from susgpt import views
+from rest_framework.urlpatterns import format_suffix_patterns
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('websites/', views.Website_List),
     path('websites/<str:company_name>/', views.Website_Detail) # Example: http://127.0.0.1:8000/websites/Neufin/
 ]
+
+urlpatterns = format_suffix_patterns(urlpatterns)
