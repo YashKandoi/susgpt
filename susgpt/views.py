@@ -1,5 +1,6 @@
 import re
 from django.http import JsonResponse
+from django.shortcuts import render
 import requests
 from .models import Website
 from .serializers import WebsiteSerializer
@@ -7,7 +8,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 
-# Extract blog links from output
+# Extract button links from output
 def extract_links(content):
     # Find the "Links/Buttons:" section
     links_section_start = content.find("Links/Buttons:")
@@ -47,7 +48,6 @@ def scrape_website(url):
         if len(company_name) > 1:
             company_name2 = company_name.replace(" ", "-")
         # Layer 2 response
-        # headers = {"X-With-Generated-Alt": "true"}
         for link in links:
             if (company_name) in link or (company_name2) in link:
                 response = requests.get("https://r.jina.ai/" + link, headers=headers)
@@ -63,15 +63,23 @@ def scrape_website(url):
 def Website_List(request,format=None):
 
     if request.method == 'GET':
-        websites = Website.objects.all()
-        serializer = WebsiteSerializer(websites, many=True)
-        return Response(serializer.data)
+        output = [{"company_name": output.company_name, "url": output.url, "output": output.output}
+                  for output in Website.objects.all()]
+        # websites = Website.objects.all()
+        # serializer = WebsiteSerializer(websites, many=True)
+        # return Response(serializer.data)
+        return Response(output)
 
     elif request.method == 'POST':
         serializer = WebsiteSerializer(data=request.data)
-        if(serializer.is_valid()):
+        if serializer.is_valid():
+            # Check if the company name already exists in the database
+            if Website.objects.filter(company_name=request.data['company_name']).exists():
+                return Response("Company name already exists", status=status.HTTP_400_BAD_REQUEST)
             serializer.save()
-            # Make call to Reader Jina API here by sending the required parameters
+            response = scrape_website(request.data['url'])
+            serializer.validated_data['output'] = response
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
@@ -99,3 +107,5 @@ def Website_Detail(request, company_name,format=None):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+def home(request):
+    return render(request,'homepage.html')

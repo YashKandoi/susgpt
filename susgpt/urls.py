@@ -19,9 +19,10 @@ from susgpt import views
 from rest_framework.urlpatterns import format_suffix_patterns
 
 urlpatterns = [
+    path('',views.home, name='home'),
     path('admin/', admin.site.urls),
-    path('websites/', views.Website_List),
-    path('websites/<str:company_name>/', views.Website_Detail) # Example: http://127.0.0.1:8000/websites/Neufin/
+    path('websites/', views.Website_List, name='website-list'),
+    path('websites/<str:company_name>/', views.Website_Detail, name='website-detail') # Example: http://127.0.0.1:8000/websites/Neufin/
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
