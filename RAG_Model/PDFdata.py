@@ -8,10 +8,10 @@ from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.pdfpage import PDFPage
 from pdfminer.pdfparser import PDFParser
 
-def getDataFromPDF(pdf_path):
+def getDataFromPDF(pdf_paths):
 
     rag_docs = []
-    for pdf_path in pdf_path:
+    for pdf_path in pdf_paths:
         pdf_data = open(pdf_path, 'rb').read()
 
         text_paras = []

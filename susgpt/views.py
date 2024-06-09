@@ -1,4 +1,5 @@
 import re
+from urllib.parse import urlparse
 from django.http import JsonResponse
 from django.shortcuts import render
 import requests
@@ -31,29 +32,34 @@ def scrape_website(url):
         headers = { "X-With-Generated-Alt": "true",
                     "X-With-Links-Summary": "true",
                     "X-With-Images-Summary": "true",
-                    "X-No-Cache": "true",
                     "X-Target-Selector": "#img-content",
                     "X-Wait-For-Selector": "#content"
                      }
         # Layer 1 response
-        response = requests.get("https://r.jina.ai/" + url, headers=headers)
+        response = requests.get(urlparse("https://r.jina.ai/" + url).geturl(), headers=headers)
         response.raise_for_status()  # Check if the request was successful
         links = extract_links(response.text)
         output=response.text + "\n"
         # extract the name of the company from the url, Example: http://neufin.com, output: neufin
         company_name = url.split("//")[1].split(".")[0]
         company_name = company_name.lower()
-        # if company name more than 1 letter add - in between words
-        company_name2=""
-        if len(company_name) > 1:
-            company_name2 = company_name.replace(" ", "-")
+        counter = 0
         # Layer 2 response
         for link in links:
-            if (company_name) in link or (company_name2) in link:
-                response = requests.get("https://r.jina.ai/" + link, headers=headers)
-                response.raise_for_status()
+            if counter > 15:
+                break
+            counter += 1
+            if 'youtube' in link or 'twitter' in link:
+                continue
+            if True:
+                response = requests.get(urlparse("https://r.jina.ai/" + link).geturl(), headers=headers)
+                # if error, continue with the next link
+                if response.status_code != 200:
+                    continue
                 output += response.text + "\n"
         output += "Total number of characters: " + str(len(output))
+        output += "'Number of links:" + str(len(links))
+        output += "Number of links scraped: " + str(counter)
         return output
     except requests.RequestException as e:
         return {'error': str(e)}
@@ -65,9 +71,6 @@ def Website_List(request,format=None):
     if request.method == 'GET':
         output = [{"company_name": output.company_name, "url": output.url, "output": output.output}
                   for output in Website.objects.all()]
-        # websites = Website.objects.all()
-        # serializer = WebsiteSerializer(websites, many=True)
-        # return Response(serializer.data)
         return Response(output)
 
     elif request.method == 'POST':
@@ -81,7 +84,7 @@ def Website_List(request,format=None):
             serializer.validated_data['output'] = response
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET','PUT','DELETE'])
 def Website_Detail(request, company_name,format=None):

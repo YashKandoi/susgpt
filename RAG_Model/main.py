@@ -1,9 +1,16 @@
 # HuggingFace + JINA Embeddings + ChromaDB Model
+# qdrant_api_key = "Q9Jc-AkCMla1Megpbijv9YBpPdJA3cT9BUxtPjBN-L1X8TEfsJYxcw"
+# qdrant_server = "https://d3284cdf-0ad6-452f-a2b6-3c67172d309b.us-east4-0.gcp.cloud.qdrant.io:6333"
+
+import os
 from llama_index.llms.huggingface import HuggingFaceInferenceAPI
 from llama_index.embeddings.jinaai import JinaEmbedding
 from llama_index.core.query_engine import RetrieverQueryEngine
 from llama_index.core.retrievers import VectorIndexRetriever
 from llama_index.core.storage.storage_context import StorageContext
+import chromadb
+from chromadb.config import Settings
+from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.core import (
 		VectorStoreIndex,
 		ServiceContext,
@@ -11,7 +18,7 @@ from llama_index.core import (
 )
 
 from PDFdata import getDataFromPDF
-from indexing import indexing_page
+from WebisteDataQuery import GetWebsiteDataQueryEngine
 from promptTemplate import GetPromptTemplate
 
 #get the API keys from .txt files
@@ -36,15 +43,19 @@ jina_embedding_model = JinaEmbedding(
 )
 
 # Can take several pdfs
+pdf_directory = 'RAG_Model/pdfs'
 pdf_path= []
-pdf_path.append("/Users/yash/susgpt/RAG_Model/National-Artificial-Intelligence-Research-and-Development-Strategic-Plan-2023-Update.pdf")
-rag_docs = getDataFromPDF(pdf_path)
-# print total length of the documents
-len_docs = 0
-for doc in rag_docs:
-   len_docs += (len(doc.text))
-print(f"Total length of the documents is {len_docs}")
-print(rag_docs[0].text)
+
+pdf_paths = []
+for root, _, files in os.walk(pdf_directory):
+    for file in files:
+        if file.endswith('.pdf'):
+            pdf_paths.append(os.path.join(root, file))
+
+if pdf_paths == []:
+    rag_docs = []
+else:
+    rag_docs = getDataFromPDF(pdf_paths)
 
 print("Sustainability Chatbot is initialising....")
 
@@ -55,7 +66,10 @@ jinaai_ef = embedding_functions.JinaEmbeddingFunction(
                 model_name="jina-embeddings-v2-base-en"
             )
 
-vector_store = indexing_page(jinaai_ef)
+db = chromadb.PersistentClient(path='chromadb', settings=Settings())
+chroma_collection = db.get_or_create_collection("SusGPT", embedding_function=jinaai_ef)
+vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
+
 
 # set up the service and storage contexts
 service_context = ServiceContext.from_defaults(
@@ -84,9 +98,18 @@ query_engine = RetrieverQueryEngine(
     response_synthesizer=response_synthesizer,
 )
 
+################# Website Data Processing Starts #################
+
+query_engine_website = GetWebsiteDataQueryEngine()
+
+################# Website Data Processing Ends #################
+
 print("give 'q' to stop conversation")
 question = str(input("User : "))
 while question != "q":
     response = query_engine.query(f"""{question}""")
-    print("AI : ", response.response)
+    response2 = query_engine_website.query(f"""{question}""")
+    final_query = response.response + response2.response
+    final_response = query_engine.query(f"""Summarise them: {final_query}""")
+    print("AI : ", final_response.response)
     question = str(input("User : "))
