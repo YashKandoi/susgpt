@@ -7,6 +7,8 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 import requests
 
+from RAG_Model.WebisteDataQuery import GetWebsiteDataQueryEngine
+from RAG_Model.discovery import Discovery
 from RAG_Model.matchmaking import initializeMatchmaking
 from .models import Website
 from .serializers import WebsiteSerializer
@@ -144,7 +146,6 @@ def matchmaking_view(request):
             # logger = logging.getLogger('django')
             # logger.info(request.body)
             # data = json.loads(request.body)
-            # add a debugging line here
             role = request.POST.get('role', 'Product Manager')
             skills = request.POST.get('skills', 'Python, SQL, Machine Learning')
             question = request.POST.get('question', 'What are the jobs in Climate Change Sector in India?')
@@ -156,5 +157,25 @@ def matchmaking_view(request):
 
         except Exception as e:
             return JsonResponse({'error': 'Error is '+str(e)}, status=500)
+    else:
+        return JsonResponse({'error': 'Invalid HTTP method. Only POST is allowed.'}, status=405)
+
+
+@csrf_exempt
+def discovery_view(request):
+    
+    if request.method == 'POST':
+        try:            
+            get_api_keys()
+            question = request.POST.get('question', 'List top 5 startups in the sustainability sector in India')
+            logger = logging.getLogger('django')
+            response = Discovery( hf_inference_api_key, jina_emb_api_key, question )
+            logger.info(response)
+            if not response:
+                return JsonResponse({'error': 'Empty response received'}, status=400)
+            return JsonResponse({'response': response}, status=200)
+
+        except Exception as e:
+            return JsonResponse({'error':str(e)}, status=500)
     else:
         return JsonResponse({'error': 'Invalid HTTP method. Only POST is allowed.'}, status=405)

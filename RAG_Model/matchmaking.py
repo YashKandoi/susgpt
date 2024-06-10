@@ -1,5 +1,7 @@
 # HuggingFace + JINA Embeddings + ChromaDB Model
 
+import csv
+from llama_index.core import PromptTemplate
 from urllib.parse import urlparse
 import requests
 from llama_index.core.node_parser import SentenceSplitter
@@ -17,7 +19,24 @@ from llama_index.core import (
 		ServiceContext,
 		get_response_synthesizer,
 )
-from .promptTemplate import GetJobPromptTemplate
+
+def GetJobPromptTemplate():
+    qa_prompt_tmpl = (
+        " Context information is below. \n"
+        "---------------------\n"
+        "{context_str}\\n"
+        "---------------------\n"
+        "Given the context information and not prior knowledge, "
+        "answer the query. Please be brief, concise, and complete.\n"
+        f"The information is about job search for the candidate.\n"
+        "If the context information does not contain an answer to the query, "
+        "respond with \"No information\".\n"
+        "Query: {query_str}\n"
+        "Answer: "
+    )
+    qa_prompt = PromptTemplate(qa_prompt_tmpl)
+
+    return qa_prompt
 
 def initializeMatchmaking(hf_inference_api_key, jina_emb_api_key, role='Product Manager', skills='Python, SQL, Machine Learning',question='What are the jobs in Climate Change Sector in India?'):
     

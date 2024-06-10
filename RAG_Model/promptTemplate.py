@@ -4,7 +4,7 @@ from llama_index.core import PromptTemplate
 def GetPromptTemplate():
 
     companies=""
-    with open("../company_data.csv", "r") as file:
+    with open("company_data.csv", "r") as file:
         csv_reader = csv.reader(file)
         for row in csv_reader:
             companies += f"Company: {row[1]}, "

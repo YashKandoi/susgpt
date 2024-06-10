@@ -1,5 +1,5 @@
 # HuggingFace + JINA Embeddings + ChromaDB Model
-
+# this is not used right now, will be changed to add new website embedding to the index
 from llama_index.llms.huggingface import HuggingFaceInferenceAPI
 from llama_index.core.node_parser import JSONNodeParser
 from llama_index.core.node_parser import SentenceSplitter
@@ -16,15 +16,37 @@ from llama_index.core import (
 		ServiceContext,
 		get_response_synthesizer,
 )
-from promptTemplate import GetPromptTemplate
 
-def GetWebsiteDataQueryEngine():
+import csv
+from llama_index.core import PromptTemplate
 
-    #get the API keys from .txt files
-    # Hugging Face API Key [Free]
-    hf_inference_api_key = open("hf_inference_api_key.txt", "r").read()
-    # JINA Embeddings API Key [Free]
-    jina_emb_api_key = open("jina_emb_api_key.txt", "r").read()
+def GetPromptTemplate():
+
+    companies=""
+    with open("company_data.csv", "r") as file:
+        csv_reader = csv.reader(file)
+        for row in csv_reader:
+            companies += f"Company: {row[1]}, "
+
+    qa_prompt_tmpl = (
+        " Context information is below. \n"
+        "---------------------\n"
+        "{context_str}\\n"
+        "---------------------\n"
+        "Given the context information and not prior knowledge, "
+        "answer the query. Please be brief, concise, and complete.\n"
+        f"The information is about one of these companies in the Sustainability Sector in India:  {companies}. Answer for these companies only!\n"
+        "If the context information does not contain an answer to the query, "
+        "respond with \"No information\".\n"
+        "Query: {query_str}\n"
+        "Answer: "
+    )
+    qa_prompt = PromptTemplate(qa_prompt_tmpl)
+
+    return qa_prompt
+
+
+def GetWebsiteDataQueryEngine(hf_inference_api_key, jina_emb_api_key):
 
     # Get prompt Template
     qa_prompt = GetPromptTemplate()
@@ -41,20 +63,6 @@ def GetWebsiteDataQueryEngine():
         model="jina-embeddings-v2-base-en",
     )
 
-    import requests
-
-    website_list = requests.get("http://127.0.0.1:8000/websites/")
-    website_list = website_list.json()
-    nodes=[]
-    for website in website_list:
-        # print(website['company_name'])
-        website_url=website['url']
-        website_details = website['output']
-        splitter = SentenceSplitter(chunk_size=1024, chunk_overlap=20)
-        list = splitter.split_text(website_details)
-        for i in range(len(list)):
-            node = TextNode(text=list[i], id=hash(website_url+str(i)))
-            nodes.append(node)
 
     # print("Sustainability Chatbot is initialising....")
 
@@ -73,9 +81,25 @@ def GetWebsiteDataQueryEngine():
     service_context = ServiceContext.from_defaults(
         llm=mixtral_llm, embed_model=jina_embedding_model
     )
+
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
     # create an index
+    # import requests
+
+    # website_list = requests.get("http://127.0.0.1:8000/websites/")
+    # website_list = website_list.json()
+    # nodes=[]
+    # for website in website_list:
+    #     # print(website['company_name'])
+    #     website_url=website['url']
+    #     website_details = website['output']
+    #     splitter = SentenceSplitter(chunk_size=1024, chunk_overlap=20)
+    #     list = splitter.split_text(website_details)
+    #     for i in range(len(list)):
+    #         node = TextNode(text=list[i], id=hash(website_url+str(i)))
+    #         nodes.append(node)
+
     # index = VectorStoreIndex(
     #     nodes, 
     #     storage_context=storage_context, 
