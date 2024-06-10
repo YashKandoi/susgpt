@@ -22,7 +22,8 @@ urlpatterns = [
     path('',views.home, name='home'),
     path('admin/', admin.site.urls),
     path('websites/', views.Website_List, name='website-list'),
-    path('websites/<str:company_name>/', views.Website_Detail, name='website-detail') # Example: http://127.0.0.1:8000/websites/Neufin/
+    path('websites/<str:company_name>/', views.Website_Detail, name='website-detail'), 
+    path('chatbot/matchmaking/', views.matchmaking_view, name='matchmaking_view'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

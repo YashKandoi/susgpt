@@ -1,13 +1,29 @@
+import json
 import re
+import logging
 from urllib.parse import urlparse
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
 import requests
+
+from RAG_Model.matchmaking import initializeMatchmaking
 from .models import Website
 from .serializers import WebsiteSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+
+hf_inference_api_key=""
+jina_emb_api_key=""
+
+def get_api_keys():
+    global hf_inference_api_key
+    global jina_emb_api_key
+    # Hugging Face API Key [Free]
+    hf_inference_api_key = open("susgpt/hf_inference_api_key.txt", "r").read()
+    # JINA Embeddings API Key [Free]
+    jina_emb_api_key = open("susgpt/jina_emb_api_key.txt", "r").read()
 
 # Extract button links from output
 def extract_links(content):
@@ -113,3 +129,32 @@ def Website_Detail(request, company_name,format=None):
     
 def home(request):
     return render(request,'homepage.html')
+
+@api_view(['GET'])
+def MatchmakingChatbotResponseFirstTime(request,role,skills,question):
+    response = initializeMatchmaking(role,skills,question)
+    return JsonResponse(response)
+
+@csrf_exempt
+def matchmaking_view(request):
+    
+    if request.method == 'POST':
+        try:            
+            get_api_keys()
+            # logger = logging.getLogger('django')
+            # logger.info(request.body)
+            # data = json.loads(request.body)
+            # add a debugging line here
+            role = request.POST.get('role', 'Product Manager')
+            skills = request.POST.get('skills', 'Python, SQL, Machine Learning')
+            question = request.POST.get('question', 'What are the jobs in Climate Change Sector in India?')
+
+            response = initializeMatchmaking(hf_inference_api_key, jina_emb_api_key, role=role, skills=skills, question=question)
+            if not response:
+                return JsonResponse({'error': 'Empty response received'}, status=400)
+            return JsonResponse({'response': response}, status=200)
+
+        except Exception as e:
+            return JsonResponse({'error': 'Error is '+str(e)}, status=500)
+    else:
+        return JsonResponse({'error': 'Invalid HTTP method. Only POST is allowed.'}, status=405)
