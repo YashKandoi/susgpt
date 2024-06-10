@@ -47,14 +47,15 @@ def GetWebsiteDataQueryEngine():
 
     website_list = requests.get("http://127.0.0.1:8000/websites/")
     website_list = website_list.json()
-    website_data = []
     nodes=[]
+    counter = 0
     for website in website_list:
-        website_data=[]
+        counter += 1
+        if counter <= 41:
+            continue
         # print(website['company_name'])
         website_url=website['url']
-        website_details = website['output'][:25000]
-        website_data.append(website_details)
+        website_details = website['output']
         splitter = SentenceSplitter(chunk_size=1024, chunk_overlap=20)
         list = splitter.split_text(website_details)
         for i in range(len(list)):
@@ -81,11 +82,14 @@ def GetWebsiteDataQueryEngine():
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
     # create an index
-    index = VectorStoreIndex(
-        nodes, 
-        storage_context=storage_context, 
-        service_context=service_context
-    )
+    # index = VectorStoreIndex(
+    #     nodes, 
+    #     storage_context=storage_context, 
+    #     service_context=service_context
+    # )
+
+    # loading the created index
+    index = VectorStoreIndex.from_vector_store(vector_store=vector_store,service_context=service_context)
 
     # configure retriever
     retriever = VectorIndexRetriever(index=index, similarity_top_k=3)

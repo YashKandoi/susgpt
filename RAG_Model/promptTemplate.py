@@ -10,12 +10,13 @@ def GetPromptTemplate():
             companies += f"Company: {row[1]}, "
 
     qa_prompt_tmpl = (
-        f"The information is about one of these companies in the Sustainability Sector in India:  {companies}.Context information is below. \n"
+        " Context information is below. \n"
         "---------------------\n"
         "{context_str}\\n"
         "---------------------\n"
         "Given the context information and not prior knowledge, "
         "answer the query. Please be brief, concise, and complete.\n"
+        f"The information is about one of these companies in the Sustainability Sector in India:  {companies}. Answer for these companies only!\n"
         "If the context information does not contain an answer to the query, "
         "respond with \"No information\".\n"
         "Query: {query_str}\n"
