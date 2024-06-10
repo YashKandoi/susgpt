@@ -1,6 +1,4 @@
 # HuggingFace + JINA Embeddings + ChromaDB Model
-# qdrant_api_key = "Q9Jc-AkCMla1Megpbijv9YBpPdJA3cT9BUxtPjBN-L1X8TEfsJYxcw"
-# qdrant_server = "https://d3284cdf-0ad6-452f-a2b6-3c67172d309b.us-east4-0.gcp.cloud.qdrant.io:6333"
 
 from llama_index.llms.huggingface import HuggingFaceInferenceAPI
 from llama_index.core.node_parser import JSONNodeParser
@@ -48,11 +46,7 @@ def GetWebsiteDataQueryEngine():
     website_list = requests.get("http://127.0.0.1:8000/websites/")
     website_list = website_list.json()
     nodes=[]
-    counter = 0
     for website in website_list:
-        counter += 1
-        if counter <= 41:
-            continue
         # print(website['company_name'])
         website_url=website['url']
         website_details = website['output']

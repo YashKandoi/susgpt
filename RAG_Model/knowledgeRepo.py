@@ -1,6 +1,4 @@
 # HuggingFace + JINA Embeddings + ChromaDB Model
-# qdrant_api_key = "Q9Jc-AkCMla1Megpbijv9YBpPdJA3cT9BUxtPjBN-L1X8TEfsJYxcw"
-# qdrant_server = "https://d3284cdf-0ad6-452f-a2b6-3c67172d309b.us-east4-0.gcp.cloud.qdrant.io:6333"
 
 import os
 from urllib.parse import urlparse

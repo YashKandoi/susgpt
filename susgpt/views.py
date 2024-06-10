@@ -46,17 +46,18 @@ def scrape_website(url):
         counter = 0
         # Layer 2 response
         for link in links:
-            if counter > 15:
-                break
             counter += 1
             if 'youtube' in link or 'twitter' in link:
                 continue
-            if True:
+            if company_name in link:
                 response = requests.get(urlparse("https://r.jina.ai/" + link).geturl(), headers=headers)
                 # if error, continue with the next link
                 if response.status_code != 200:
                     continue
                 output += response.text + "\n"
+                if len(output) > 100000:
+                    print('100000 characters reached')
+                    break
         output += "Total number of characters: " + str(len(output))
         output += "'Number of links:" + str(len(links))
         output += "Number of links scraped: " + str(counter)
