@@ -92,7 +92,7 @@ def initializeMatchmaking(hf_inference_api_key, jina_emb_api_key, role='Product 
     )
 
     # configure retriever
-    retriever = VectorIndexRetriever(index=index, similarity_top_k=4)
+    retriever = VectorIndexRetriever(index=index, similarity_top_k=6)
 
     # configure response synthesizer
     response_synthesizer = get_response_synthesizer(
@@ -152,7 +152,7 @@ def initializeMatchmaking(hf_inference_api_key, jina_emb_api_key, role='Product 
     index = VectorStoreIndex.from_vector_store(vector_store=vector_store,service_context=service_context)
 
     # configure retriever
-    retriever = VectorIndexRetriever(index=index, similarity_top_k=4)
+    retriever = VectorIndexRetriever(index=index, similarity_top_k=6)
 
     # configure response synthesizer
     response_synthesizer = get_response_synthesizer(

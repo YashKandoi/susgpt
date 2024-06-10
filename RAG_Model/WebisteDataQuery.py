@@ -110,7 +110,7 @@ def GetWebsiteDataQueryEngine(hf_inference_api_key, jina_emb_api_key):
     index = VectorStoreIndex.from_vector_store(vector_store=vector_store,service_context=service_context)
 
     # configure retriever
-    retriever = VectorIndexRetriever(index=index, similarity_top_k=3)
+    retriever = VectorIndexRetriever(index=index, similarity_top_k=6)
 
     # configure response synthesizer
     response_synthesizer = get_response_synthesizer(

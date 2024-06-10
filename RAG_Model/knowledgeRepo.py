@@ -139,7 +139,7 @@ def initializeKnowledgeRepo(hf_inference_api_key, jina_emb_api_key, question):
     logger.info("Data Indexed Successfully")
 
     # configure retriever
-    retriever = VectorIndexRetriever(index=index, similarity_top_k=3)
+    retriever = VectorIndexRetriever(index=index, similarity_top_k=6)
 
     # configure response synthesizer
     response_synthesizer = get_response_synthesizer(
@@ -199,7 +199,7 @@ def knowledgeRepoChatbot( hf_inference_api_key, jina_emb_api_key, question ):
     logger.info("Data Indexe Fetched Successfully")
 
     # configure retriever
-    retriever = VectorIndexRetriever(index=index, similarity_top_k=3)
+    retriever = VectorIndexRetriever(index=index, similarity_top_k=6)
 
     # configure response synthesizer
     response_synthesizer = get_response_synthesizer(

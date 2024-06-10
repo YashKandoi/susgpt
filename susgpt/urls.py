@@ -29,5 +29,6 @@ urlpatterns = [
     path('susgpt/knowledgeRepoChatbot/', views.knowledgeRepoChatbot_view, name='knowledgeRepoChatbot_view'),
     path('susgpt/clearPdfFolder/', views.clear_folder, name='clearPdfFolder_view')
 ]
+# Demo POST request: http://127.0.0.1:8000/susgpt/knowledgeRepoChatbot/
 
 urlpatterns = format_suffix_patterns(urlpatterns)
