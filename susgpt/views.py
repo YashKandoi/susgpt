@@ -1,6 +1,8 @@
 import json
 import re
 import logging
+import os
+import shutil
 from urllib.parse import urlparse
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -188,9 +190,12 @@ def initialize_knowledgeRepo_view(request):
     if request.method == 'POST':
         try:            
             get_api_keys()
-            question = request.POST.get('question', 'Please summarise the information.')
             # logger = logging.getLogger('django')
-            response = initializeKnowledgeRepo( hf_inference_api_key, jina_emb_api_key, question )
+            # logger.info("Deleting all files present previously in 'RAG_Model/pdfs' folder")
+            question = request.POST.get('question', 'Please summarise the information.')
+            jina_emb_api_key_1 = request.POST.get('jina_emb_api_key', jina_emb_api_key)
+            # logger = logging.getLogger('django')
+            response = initializeKnowledgeRepo( hf_inference_api_key, jina_emb_api_key_1, question )
             # logger.info(response)
             if not response:
                 return JsonResponse({'error': 'Empty response received'}, status=400)
@@ -219,3 +224,17 @@ def knowledgeRepoChatbot_view(request):
             return JsonResponse({'error':str(e)}, status=500)
     else:
         return JsonResponse({'error': 'Invalid HTTP method. Only POST is allowed.'}, status=405)
+
+@api_view(["POST"])
+def clear_folder(request):
+    folder = 'RAG_Model/pdfs'
+    try:
+        for filename in os.listdir(folder):
+            file_path = os.path.join(folder, filename)
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        return JsonResponse({"message": "Folder cleared successfully"}, status=200)
+    except Exception as e:
+        return JsonResponse({"error": f"Failed to delete {file_path}. Reason: {e}"}, status=500)
