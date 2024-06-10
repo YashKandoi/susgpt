@@ -1,0 +1,5 @@
+4 chroma databases
+1. 'NSTC': no use
+2. 'SusGPT': for Discovery
+3. 'Matchmaking' : for Matchmaking
+4. 'SusGPTpdf': for knowledgeRepo

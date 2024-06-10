@@ -25,6 +25,8 @@ urlpatterns = [
     path('websites/<str:company_name>/', views.Website_Detail, name='website-detail'), 
     path('chatbot/matchmaking/', views.matchmaking_view, name='matchmaking_view'),
     path('chatbot/discovery/', views.discovery_view, name='discovery_view'),
+    path('chatbot/initializeKnowledgeRepo/', views.initialize_knowledgeRepo_view, name='initialize_knowledgeRepo_view'),
+    path('chatbot/knowledgeRepoChatbot/', views.knowledgeRepoChatbot_view, name='knowledgeRepoChatbot_view'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

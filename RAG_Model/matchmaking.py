@@ -74,7 +74,7 @@ def initializeMatchmaking(hf_inference_api_key, jina_emb_api_key, role='Product 
                     model_name="jina-embeddings-v2-base-en"
                 )
 
-    db = chromadb.PersistentClient(path='chromadb', settings=Settings())
+    db = chromadb.PersistentClient(path='RAG_Model/chromadb', settings=Settings())
     chroma_collection = db.get_or_create_collection("Matchmaking", embedding_function=jinaai_ef)
     vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
 

@@ -3,6 +3,7 @@
 import os
 from urllib.parse import urlparse
 import requests
+import logging
 from llama_index.llms.huggingface import HuggingFaceInferenceAPI
 from llama_index.embeddings.jinaai import JinaEmbedding
 from llama_index.core.query_engine import RetrieverQueryEngine
@@ -16,20 +17,22 @@ from llama_index.core import (
 		ServiceContext,
 		get_response_synthesizer,
 )
+from llama_index.core.readers import StringIterableReader
+import regex as re
+from io import BytesIO, StringIO
+from pdfminer.converter import TextConverter
+from pdfminer.layout import LAParams
+from pdfminer.pdfdocument import PDFDocument
+from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
+from pdfminer.pdfpage import PDFPage
+from pdfminer.pdfparser import PDFParser
 
-from PDFdata import getDataFromPDF
-from WebisteDataQuery import GetWebsiteDataQueryEngine
+from .WebisteDataQuery import GetWebsiteDataQueryEngine
 
 import csv
 from llama_index.core import PromptTemplate
 
 def GetPromptTemplate():
-
-    companies=""
-    with open("company_data.csv", "r") as file:
-        csv_reader = csv.reader(file)
-        for row in csv_reader:
-            companies += f"Company: {row[1]}, "
 
     qa_prompt_tmpl = (
         " Context information is below. \n"
@@ -38,7 +41,7 @@ def GetPromptTemplate():
         "---------------------\n"
         "Given the context information and not prior knowledge, "
         "answer the query. Please be brief, concise, and complete.\n"
-        f"The information is about one of these companies in the Sustainability Sector in India:  {companies}. Answer for these companies only!\n"
+        f"The information is taken from a pdf and fetched to you!\n"
         "If the context information does not contain an answer to the query, "
         "respond with \"No information\".\n"
         "Query: {query_str}\n"
@@ -48,95 +51,169 @@ def GetPromptTemplate():
 
     return qa_prompt
 
-#get the API keys from .txt files
-# Hugging Face API Key [Free]
-hf_inference_api_key = open("hf_inference_api_key.txt", "r").read()
-# JINA Embeddings API Key [Free]
-jina_emb_api_key = open("jina_emb_api_key.txt", "r").read()
+def getDataFromPDF(pdf_paths):
 
-# Get prompt Template
-qa_prompt = GetPromptTemplate()
-
-# Set up the models to be used
-mixtral_llm = HuggingFaceInferenceAPI(
-    model_name="mistralai/Mixtral-8x7B-Instruct-v0.1", 
-    token=hf_inference_api_key
-)
-
-# Set up the embedding model
-jina_embedding_model = JinaEmbedding(
-    api_key=jina_emb_api_key,
-    model="jina-embeddings-v2-base-en",
-)
-
-# Can take several pdfs
-pdf_directory = 'RAG_Model/pdfs'
-pdf_path= []
-
-pdf_paths = []
-for root, _, files in os.walk(pdf_directory):
-    for file in files:
-        if file.endswith('.pdf'):
-            pdf_paths.append(os.path.join(root, file))
-
-if pdf_paths == []:
     rag_docs = []
-else:
-    rag_docs = getDataFromPDF(pdf_paths)
+    for pdf_path in pdf_paths:
+        pdf_data = open(pdf_path, 'rb').read()
 
-print("Sustainability Chatbot is initialising....")
+        text_paras = []
+        parser = PDFParser(BytesIO(pdf_data))
+        doc = PDFDocument(parser)
+        rsrcmgr = PDFResourceManager()
+        for page in PDFPage.create_pages(doc):
+            output_string = StringIO()
+            device = TextConverter(rsrcmgr, output_string, laparams=LAParams())
+            interpreter = PDFPageInterpreter(rsrcmgr, device)
+            interpreter.process_page(page)
+            page_text = output_string.getvalue()
+            text_paras.extend(re.split(r'\n\s*\n', page_text))
 
-# getting vector store configured
-import chromadb.utils.embedding_functions as embedding_functions
-jinaai_ef = embedding_functions.JinaEmbeddingFunction(
-                api_key=jina_emb_api_key,
-                model_name="jina-embeddings-v2-base-en"
-            )
+        rag_docs_data = StringIterableReader().load_data(text_paras)
+        rag_docs.extend(rag_docs_data)
 
-db = chromadb.PersistentClient(path='chromadb', settings=Settings())
-chroma_collection = db.get_or_create_collection("SusGPT", embedding_function=jinaai_ef)
-vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
+    return rag_docs
 
-# set up the service and storage contexts
-service_context = ServiceContext.from_defaults(
-    llm=mixtral_llm, embed_model=jina_embedding_model
-)
-storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
-# create an index
+def get_rag_docs():
+    pdf_directory = 'RAG_Model/pdfs'
+    pdf_paths = []
+    for root, _, files in os.walk(pdf_directory):
+        for file in files:
+            if file.endswith('.pdf'):
+                pdf_paths.append(os.path.join(root, file))
 
-index = VectorStoreIndex.from_documents(
-    rag_docs, storage_context=storage_context, service_context=service_context
-)
+    if pdf_paths == []:
+        rag_docs = []
+    else:
+        rag_docs = getDataFromPDF(pdf_paths)
+    
+    return rag_docs
 
-# configure retriever
-retriever = VectorIndexRetriever(index=index, similarity_top_k=3)
+def initializeKnowledgeRepo(hf_inference_api_key, jina_emb_api_key, question):
 
-# configure response synthesizer
-response_synthesizer = get_response_synthesizer(
-    service_context=service_context,
-    text_qa_template=qa_prompt,
-    response_mode="compact",
-)
+    # Get prompt Template
+    qa_prompt = GetPromptTemplate()
 
-# assemble query engine
-query_engine = RetrieverQueryEngine(
-    retriever=retriever,
-    response_synthesizer=response_synthesizer,
-)
+    # Set up the models to be used
+    mixtral_llm = HuggingFaceInferenceAPI(
+        model_name="mistralai/Mixtral-8x7B-Instruct-v0.1", 
+        token=hf_inference_api_key
+    )
 
-################# Website Data Processing Starts #################
+    # Set up the embedding model
+    jina_embedding_model = JinaEmbedding(
+        api_key=jina_emb_api_key,
+        model="jina-embeddings-v2-base-en",
+    )
 
-query_engine_website = GetWebsiteDataQueryEngine(hf_inference_api_key, jina_emb_api_key)
+    # Can take several pdfs
+    rag_docs = get_rag_docs()
+    logger = logging.getLogger('django')
+    logger.info("PDF Data Loaded Successfully")
+    logger.info(f"Number of Documents: {len(rag_docs)}")
+    
 
-################# Website Data Processing Ends #################
+    # getting vector store configured
+    import chromadb.utils.embedding_functions as embedding_functions
+    jinaai_ef = embedding_functions.JinaEmbeddingFunction(
+                    api_key=jina_emb_api_key,
+                    model_name="jina-embeddings-v2-base-en"
+                )
 
-print("give 'q' to stop conversation")
-question = str(input("User : "))
-while question != "q":
+    db = chromadb.PersistentClient(path='RAG_Model/chromadb', settings=Settings())
+    chroma_collection = db.get_or_create_collection("SusGPTpdf", embedding_function=jinaai_ef)
+    vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
+
+    # set up the service and storage contexts
+    service_context = ServiceContext.from_defaults(
+        llm=mixtral_llm, embed_model=jina_embedding_model
+    )
+    storage_context = StorageContext.from_defaults(vector_store=vector_store)
+
+    # create an index
+    index = VectorStoreIndex.from_documents(
+        rag_docs, storage_context=storage_context, service_context=service_context
+    )
+
+    logger.info("Data Indexed Successfully")
+
+    # configure retriever
+    retriever = VectorIndexRetriever(index=index, similarity_top_k=3)
+
+    # configure response synthesizer
+    response_synthesizer = get_response_synthesizer(
+        service_context=service_context,
+        text_qa_template=qa_prompt,
+        response_mode="compact",
+    )
+
+    # assemble query engine
+    query_engine = RetrieverQueryEngine(
+        retriever=retriever,
+        response_synthesizer=response_synthesizer,
+    )
+
     response = query_engine.query(f"""{question}""")
-    response2 = query_engine_website.query(f"""{question}""")
-    final_query = response.response + response2.response
-    final_response = query_engine.query(f"""{final_query} Summarise them for this question : {question}""")
-    print("AI : ", final_response.response)
-    question = str(input("User : "))
+    
+    return response.response
+
+
+
+def knowledgeRepoChatbot( hf_inference_api_key, jina_emb_api_key, question ):
+
+    # Get prompt Template
+    qa_prompt = GetPromptTemplate()
+
+    # Set up the models to be used
+    mixtral_llm = HuggingFaceInferenceAPI(
+        model_name="mistralai/Mixtral-8x7B-Instruct-v0.1", 
+        token=hf_inference_api_key
+    )
+
+    # Set up the embedding model
+    jina_embedding_model = JinaEmbedding(
+        api_key=jina_emb_api_key,
+        model="jina-embeddings-v2-base-en",
+    )
+
+    # getting vector store configured
+    import chromadb.utils.embedding_functions as embedding_functions
+    jinaai_ef = embedding_functions.JinaEmbeddingFunction(
+                    api_key=jina_emb_api_key,
+                    model_name="jina-embeddings-v2-base-en"
+                )
+
+    db = chromadb.PersistentClient(path='RAG_Model/chromadb', settings=Settings())
+    chroma_collection = db.get_or_create_collection("SusGPTpdf", embedding_function=jinaai_ef)
+    vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
+
+    # set up the service and storage contexts
+    service_context = ServiceContext.from_defaults(
+        llm=mixtral_llm, embed_model=jina_embedding_model
+    )
+
+    # create an index
+    index = VectorStoreIndex.from_vector_store(vector_store=vector_store,service_context=service_context)
+    logger = logging.getLogger('django')
+    logger.info("Data Indexe Fetched Successfully")
+
+    # configure retriever
+    retriever = VectorIndexRetriever(index=index, similarity_top_k=3)
+
+    # configure response synthesizer
+    response_synthesizer = get_response_synthesizer(
+        service_context=service_context,
+        text_qa_template=qa_prompt,
+        response_mode="compact",
+    )
+
+    # assemble query engine
+    query_engine = RetrieverQueryEngine(
+        retriever=retriever,
+        response_synthesizer=response_synthesizer,
+    )
+   
+    response = query_engine.query(f"""{question}""")
+     
+    return response.response
