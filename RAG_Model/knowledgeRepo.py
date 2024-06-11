@@ -32,6 +32,8 @@ from .WebisteDataQuery import GetWebsiteDataQueryEngine
 import csv
 from llama_index.core import PromptTemplate
 
+pdf_names = []
+
 def GetPromptTemplate():
 
     qa_prompt_tmpl = (
@@ -88,7 +90,10 @@ def get_rag_docs():
     else:
         rag_docs = getDataFromPDF(pdf_paths)
     
-    return rag_docs
+    # return pdf name also
+    global pdf_names
+    pdf_names = [os.path.basename(pdf_path) for pdf_path in pdf_paths]
+    return rag_docs, pdf_names
 
 def initializeKnowledgeRepo(hf_inference_api_key, jina_emb_api_key, question):
 
@@ -108,7 +113,8 @@ def initializeKnowledgeRepo(hf_inference_api_key, jina_emb_api_key, question):
     )
 
     # Can take several pdfs
-    rag_docs = get_rag_docs()
+    global pdf_names
+    rag_docs, pdf_names = get_rag_docs()
     logger = logging.getLogger('django')
     logger.info("PDF Data Loaded Successfully")
     logger.info(f"Number of Documents: {len(rag_docs)}")
@@ -154,7 +160,7 @@ def initializeKnowledgeRepo(hf_inference_api_key, jina_emb_api_key, question):
         response_synthesizer=response_synthesizer,
     )
 
-    response = query_engine.query(f"""{question}""")
+    response = query_engine.query(f"""{question} The name of pdf added is {pdf_names[0]}. Answer accordingly.""")
     
     return response.response
 
@@ -214,6 +220,6 @@ def knowledgeRepoChatbot( hf_inference_api_key, jina_emb_api_key, question ):
         response_synthesizer=response_synthesizer,
     )
    
-    response = query_engine.query(f"""{question}""")
+    response = query_engine.query(f"""{question} The name of pdf added is {pdf_names[0]}. Answer accordingly.""")
      
     return response.response
