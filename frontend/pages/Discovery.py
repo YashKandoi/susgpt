@@ -7,7 +7,7 @@ st.set_page_config(
     page_title="Chat",
     page_icon="🧊",
     #layout="wide",
-    #initial_sidebar_state="expanded",
+    initial_sidebar_state="expanded",
 )
 
 url = 'http://127.0.0.1:8000/susgpt/discovery/'

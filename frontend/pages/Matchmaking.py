@@ -7,7 +7,7 @@ st.set_page_config(
     page_title="Matchmaking",
     page_icon="➕",
     #layout="wide",
-    #initial_sidebar_state="expanded",
+    initial_sidebar_state="expanded",
 )
 
 def add_title():
@@ -49,7 +49,7 @@ role = st.selectbox("Select your role: ",["Software Engineer", "Product Manager"
 skills = st.text_input("Enter your skills: ",placeholder="Python, SQL, Machine Learning")
 
 # React to user input
-if prompt := st.chat_input("What is up?"):
+if prompt := st.chat_input("What are the jobs in Climate Change Sector in India?"):
     # Display user message in chat message container
     st.chat_message("user").markdown(prompt)
     # Add user message to chat history
