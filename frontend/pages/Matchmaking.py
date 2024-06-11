@@ -31,7 +31,7 @@ add_title()
 url="http://127.0.0.1:8000/susgpt/matchmaking/"
 
 def getresponse(prompt,role,skills):
-    x = requests.post(url, data = {"question":prompt}).text.replace("\n","\\n").split('"response":')[1][2:-2].strip()
+    x = requests.post(url, data = {"question":prompt,"skills":skills,"role":role}).text.replace("\n","\\n").split('"response":')[1][2:-2].strip()
     return x
 
 
