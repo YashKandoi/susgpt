@@ -53,11 +53,12 @@ def GetPromptTemplate():
 
     return qa_prompt
 
-def getDataFromPDF(pdf_paths):
+
+def getDataFromPDF(pdf_files):
 
     rag_docs = []
-    for pdf_path in pdf_paths:
-        pdf_data = open(pdf_path, 'rb').read()
+    for pdf_file in pdf_files:
+        pdf_data = pdf_file.read()
 
         text_paras = []
         parser = PDFParser(BytesIO(pdf_data))
@@ -95,7 +96,7 @@ def get_rag_docs():
     pdf_names = [os.path.basename(pdf_path) for pdf_path in pdf_paths]
     return rag_docs, pdf_names
 
-def initializeKnowledgeRepo(hf_inference_api_key, jina_emb_api_key, question):
+def initializeKnowledgeRepo(hf_inference_api_key, jina_emb_api_key, question, pdf_file):
 
     # Get prompt Template
     qa_prompt = GetPromptTemplate()
@@ -113,8 +114,9 @@ def initializeKnowledgeRepo(hf_inference_api_key, jina_emb_api_key, question):
     )
 
     # Can take several pdfs
-    global pdf_names
-    rag_docs, pdf_names = get_rag_docs()
+    # Process the uploaded PDF file
+    rag_docs = getDataFromPDF([pdf_file])
+    pdf_name = pdf_file.name
     logger = logging.getLogger('django')
     logger.info("PDF Data Loaded Successfully")
     logger.info(f"Number of Documents: {len(rag_docs)}")
@@ -160,7 +162,7 @@ def initializeKnowledgeRepo(hf_inference_api_key, jina_emb_api_key, question):
         response_synthesizer=response_synthesizer,
     )
 
-    response = query_engine.query(f"""{question} The name of pdf added is {pdf_names[0]}. Answer accordingly.""")
+    response = query_engine.query(f"""{question} The name of pdf added is {pdf_name}. Answer accordingly.""")
     
     return response.response
 

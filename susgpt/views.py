@@ -193,9 +193,11 @@ def initialize_knowledgeRepo_view(request):
             # logger = logging.getLogger('django')
             # logger.info("Deleting all files present previously in 'RAG_Model/pdfs' folder")
             question = request.POST.get('question', 'Please summarise the information.')
+            # write function to get pdf file
+            pdf_file = request.FILES.get('pdf_file', None)
             jina_emb_api_key_1 = request.POST.get('jina_emb_api_key', jina_emb_api_key)
             # logger = logging.getLogger('django')
-            response = initializeKnowledgeRepo( hf_inference_api_key, jina_emb_api_key_1, question )
+            response = initializeKnowledgeRepo( hf_inference_api_key, jina_emb_api_key_1, question , pdf_file)
             # logger.info(response)
             if not response:
                 return JsonResponse({'error': 'Empty response received'}, status=400)
