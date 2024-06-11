@@ -18,7 +18,6 @@ def add_title():
         """
         <style>
             [data-testid="stSidebarNav"]::before {
-                content: "SusGPT";
                 margin-left: 20px;
                 margin-top: 20px;
                 font-size: 30px;
@@ -30,8 +29,9 @@ def add_title():
         unsafe_allow_html=True,
     )
 add_title()
-st.title("SusGPT")
-#st.sidebar.title("SusGPT")
+st.title("SusGPT: Discovery Mode")
+st.markdown("Find information about SusMafia Startups")
+st.sidebar.title("SusGPT")
 
 def getresponse(prompt):
     x = requests.post(url, data = {"question":prompt}).text.replace("\n","\\n").split('"response":')[1][2:-2].strip()
@@ -49,7 +49,7 @@ for message in st.session_state:
         st.markdown(message["content"])
 
 # React to user input
-if prompt := st.chat_input("What is up?"):
+if prompt := st.chat_input("What does Smart Joules do?"):
     # Display user message in chat message container
     st.chat_message("user").markdown(prompt)
     # Add user message to chat history

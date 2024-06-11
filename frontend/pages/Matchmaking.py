@@ -15,7 +15,6 @@ def add_title():
         """
         <style>
             [data-testid="stSidebarNav"]::before {
-                content: "SusGPT";
                 margin-left: 20px;
                 margin-top: 20px;
                 font-size: 30px;
@@ -27,6 +26,9 @@ def add_title():
         unsafe_allow_html=True,
     )
 add_title()
+st.title("SusGPT: MatchMaking Mode")
+st.markdown("Finds Jobs in the Climate Change Sector in India")
+st.sidebar.title("SusGPT")
 
 url="http://127.0.0.1:8000/susgpt/matchmaking/"
 

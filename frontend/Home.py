@@ -12,7 +12,6 @@ def add_title():
         """
         <style>
             [data-testid="stSidebarNav"]::before {
-                content: "SusGPT";
                 margin-left: 20px;
                 margin-top: 20px;
                 font-size: 30px;
