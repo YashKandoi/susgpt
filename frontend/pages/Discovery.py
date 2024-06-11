@@ -31,7 +31,7 @@ def add_title():
     )
 add_title()
 st.title("SusGPT")
-st.sidebar.title("SusGPT")
+#st.sidebar.title("SusGPT")
 
 def getresponse(prompt):
     x = requests.post(url, data = {"question":prompt}).text.replace("\n","\\n").split('"response":')[1][2:-2].strip()
