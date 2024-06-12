@@ -13,12 +13,12 @@ And the steps are given below as well!
 
 2. Adding API tokens from Hugging Face (it's free) [Get it here: https://huggingface.co/settings/tokens]
     1. Generate a write token
-    2. Go to susgpt/susgpt/hf_inference_api_key.txt
+    2. Go to ```susgpt/susgpt/hf_inference_api_key.txt```
     3. Paste this API token here
 
 3. Adding API tokens from JINA Embeddings (it's free) [Scroll down in this page and get it here: https://jina.ai/embeddings/]
     1. Copy this token
-    2. Go to susgpt/susgpt/jina_emb_api_key.txt
+    2. Go to ```susgpt/susgpt/jina_emb_api_key.txt```
     3. Paste this API token here
 
 4. Now open Termninal and run this:
