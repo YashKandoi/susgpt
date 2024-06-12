@@ -22,7 +22,12 @@ And the steps are given below as well!
     2. Go to ```susgpt/susgpt/jina_emb_api_key.txt```
     3. Paste this API token here
 
-5. Now open Termninal and run this:
+5. Creating a virtual environment (optional)
+   You can create a virtual env and choose to run you code on that. Open your terminal and do this:
+   1. ```python3 -m venv .venv```
+   2. ```. .venv/bin/activate
+
+7. Now open Termninal and run this:
      ```pip install -r requirements.txt```
     This will take sometime and install all required libraries.
 
@@ -30,7 +35,7 @@ And the steps are given below as well!
     ```python3 manage.py runserver```
     This will start the backend server
 
-6. Now open another terminal and run this:
+8. Now open another terminal and run this:
 
     ```streamlit run frontend/Home.py ```
     This will start the frontend server and will open up SusGPT.
