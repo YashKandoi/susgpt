@@ -140,6 +140,7 @@ soupsieve
 SQLAlchemy
 sqlparse
 starlette
+streamlit
 striprtf
 sympy
 tenacity
