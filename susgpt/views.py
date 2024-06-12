@@ -212,7 +212,7 @@ def initialize_knowledgeRepo_view(request):
 def knowledgeRepoChatbot_view(request):
     
     if request.method == 'POST':
-        try:            
+        try:
             get_api_keys()
             question = request.POST.get('question', 'Please summarise the information.')
             # logger = logging.getLogger('django')
