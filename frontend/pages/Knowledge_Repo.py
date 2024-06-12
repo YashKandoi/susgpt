@@ -1,10 +1,15 @@
 import streamlit as st
 import requests
 
-def initialize():
-    requests.post("http://127.0.0.1:8000/susgpt/clearPdfFolder/")
-    files = {'pdf_file': (uploaded_file.name, uploaded_file.getvalue(), 'multipart/form-data')}
-    requests.post("http://127.0.0.1:8000/susgpt/initializeKnowledgeRepo/",files=files)
+url="http://127.0.0.1:8000/susgpt/knowledgeRepoChatbot/"
+
+def initialize(uploaded_file):
+    if uploaded_file is None:
+        st.write("Error: Please upload a pdf file. PDF file not uploaded!")
+        return
+    files = {'pdf_file': uploaded_file}
+    requests.post(url,files=files)
+    st.write("PDF file uploaded successfully!")
 
 st.set_page_config(
     page_title="Knowledge Repo",
@@ -16,8 +21,6 @@ st.set_page_config(
 st.title("SusGPT: Knowledge Repo Mode")
 st.markdown("Add Data to the Database of SusGPT and Use It")
 st.sidebar.title("SusGPT")
-
-url="http://127.0.0.1:8000/susgpt/knowledgeRepoChatbot/"
 
 def getresponse(prompt):
     x = requests.post(url, data = {"question":prompt}).text.replace("\n","\\n").split('"response":')[1][2:-2].strip()
@@ -36,7 +39,7 @@ for message in st.session_state:
 
 uploaded_file = st.file_uploader("Choose a pdf file:",type=['pdf'])
 with st.spinner("Waiting"):
-    pressed=st.button("Upload",on_click=initialize)
+    pressed=st.button("Upload",on_click=initialize(uploaded_file))
 
 
 # React to user input

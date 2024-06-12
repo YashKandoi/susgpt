@@ -32,7 +32,7 @@ from .WebisteDataQuery import GetWebsiteDataQueryEngine
 import csv
 from llama_index.core import PromptTemplate
 
-pdf_names = []
+pdf_name = ""
 
 def GetPromptTemplate():
 
@@ -78,23 +78,23 @@ def getDataFromPDF(pdf_files):
     return rag_docs
 
 
-def get_rag_docs():
-    pdf_directory = 'RAG_Model/pdfs'
-    pdf_paths = []
-    for root, _, files in os.walk(pdf_directory):
-        for file in files:
-            if file.endswith('.pdf'):
-                pdf_paths.append(os.path.join(root, file))
+# def get_rag_docs():
+#     pdf_directory = 'RAG_Model/pdfs'
+#     pdf_paths = []
+#     for root, _, files in os.walk(pdf_directory):
+#         for file in files:
+#             if file.endswith('.pdf'):
+#                 pdf_paths.append(os.path.join(root, file))
 
-    if pdf_paths == []:
-        rag_docs = []
-    else:
-        rag_docs = getDataFromPDF(pdf_paths)
+#     if pdf_paths == []:
+#         rag_docs = []
+#     else:
+#         rag_docs = getDataFromPDF(pdf_paths)
     
-    # return pdf name also
-    global pdf_names
-    pdf_names = [os.path.basename(pdf_path) for pdf_path in pdf_paths]
-    return rag_docs, pdf_names
+#     # return pdf name also
+#     global pdf_names
+#     pdf_names = [os.path.basename(pdf_path) for pdf_path in pdf_paths]
+#     return rag_docs, pdf_names
 
 def initializeKnowledgeRepo(hf_inference_api_key, jina_emb_api_key, question, pdf_file):
 
@@ -116,6 +116,7 @@ def initializeKnowledgeRepo(hf_inference_api_key, jina_emb_api_key, question, pd
     # Can take several pdfs
     # Process the uploaded PDF file
     rag_docs = getDataFromPDF([pdf_file])
+    global pdf_name
     pdf_name = pdf_file.name
     logger = logging.getLogger('django')
     logger.info("PDF Data Loaded Successfully")
@@ -139,6 +140,7 @@ def initializeKnowledgeRepo(hf_inference_api_key, jina_emb_api_key, question, pd
     )
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
+    logger.info("Data Being indexed")
     # create an index
     index = VectorStoreIndex.from_documents(
         rag_docs, storage_context=storage_context, service_context=service_context
@@ -147,7 +149,7 @@ def initializeKnowledgeRepo(hf_inference_api_key, jina_emb_api_key, question, pd
     logger.info("Data Indexed Successfully")
 
     # configure retriever
-    retriever = VectorIndexRetriever(index=index, similarity_top_k=6)
+    retriever = VectorIndexRetriever(index=index, similarity_top_k=5)
 
     # configure response synthesizer
     response_synthesizer = get_response_synthesizer(
@@ -162,7 +164,7 @@ def initializeKnowledgeRepo(hf_inference_api_key, jina_emb_api_key, question, pd
         response_synthesizer=response_synthesizer,
     )
 
-    response = query_engine.query(f"""{question} The name of pdf added is {pdf_name}. Answer accordingly.""")
+    response = query_engine.query(f"""{question} The given context is from a pdf file. Answer the query based on the context.""")
     
     return response.response
 
@@ -207,7 +209,7 @@ def knowledgeRepoChatbot( hf_inference_api_key, jina_emb_api_key, question ):
     logger.info("Data Indexe Fetched Successfully")
 
     # configure retriever
-    retriever = VectorIndexRetriever(index=index, similarity_top_k=6)
+    retriever = VectorIndexRetriever(index=index, similarity_top_k=5)
 
     # configure response synthesizer
     response_synthesizer = get_response_synthesizer(
@@ -222,6 +224,6 @@ def knowledgeRepoChatbot( hf_inference_api_key, jina_emb_api_key, question ):
         response_synthesizer=response_synthesizer,
     )
    
-    response = query_engine.query(f"""{question} The name of pdf added is {pdf_names[0]}. Answer accordingly.""")
+    response = query_engine.query(f"""{question} The given context is from a pdf file. Answer the query based on the context.""")
      
     return response.response

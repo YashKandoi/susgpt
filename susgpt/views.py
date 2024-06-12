@@ -190,15 +190,20 @@ def initialize_knowledgeRepo_view(request):
     if request.method == 'POST':
         try:            
             get_api_keys()
-            # logger = logging.getLogger('django')
+            logger = logging.getLogger('django')
             # logger.info("Deleting all files present previously in 'RAG_Model/pdfs' folder")
             question = request.POST.get('question', 'Please summarise the information.')
-            # write function to get pdf file
+            # write function to get pdf file if it is present
             pdf_file = request.FILES.get('pdf_file', None)
             jina_emb_api_key_1 = request.POST.get('jina_emb_api_key', jina_emb_api_key)
             # logger = logging.getLogger('django')
-            response = initializeKnowledgeRepo( hf_inference_api_key, jina_emb_api_key_1, question , pdf_file)
-            # logger.info(response)
+            response = ""
+            if pdf_file is None:
+                response = knowledgeRepoChatbot( hf_inference_api_key, jina_emb_api_key, question )
+                logger.info('Question: '+question)
+            else:
+                response = initializeKnowledgeRepo( hf_inference_api_key, jina_emb_api_key_1, question , pdf_file)
+            logger.info('Response: '+response)
             if not response:
                 return JsonResponse({'error': 'Empty response received'}, status=400)
             return JsonResponse({'response': response}, status=200)
