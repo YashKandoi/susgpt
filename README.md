@@ -20,7 +20,6 @@ And the steps are given below as well!
 ### Steps to Run:
 
 1. Clone Repository from Github in an IDE from https://github.com/YashKandoi/susgpt.git or Download Zip File.
-![Discovery](https://github.com/YashKandoi/susgpt/assets/98639264/6f0913e1-d3db-4ea2-b0e5-3f2e2a6fa86b)
 
 3. Adding API tokens from Hugging Face (it's free) [Get it here: https://huggingface.co/settings/tokens]
     1. Generate a write token
