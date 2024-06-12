@@ -13,7 +13,7 @@ Since this is not hosted on any platform right now, we have developed this in lo
 
 You can see how to use it here: https://www.loom.com/share/2994f020d26d4c0abaaed9564df96312?sid=b6f2f45c-deec-4f2d-be20-1cbaf38ef9a8
 
-You can see how to install and set it up here: https://www.loom.com/share/2994f020d26d4c0abaaed9564df96312?sid=b6f2f45c-deec-4f2d-be20-1cbaf38ef9a8
+You can see how to install and set it up here: https://www.loom.com/share/97871fcfbfa843fb96b09c73d4653c79?sid=2a37f21e-3832-4950-a6d1-db7e497726af
 
 And the steps are given below as well!
 
