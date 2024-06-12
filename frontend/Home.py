@@ -7,22 +7,6 @@ st.set_page_config(
     #initial_sidebar_state="expanded",
 )
 
-def add_title():
-    st.markdown(
-        """
-        <style>
-            [data-testid="stSidebarNav"]::before {
-                margin-left: 20px;
-                margin-top: 20px;
-                font-size: 30px;
-                position: relative;
-                top: 100px;
-            }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-add_title()
 st.title("SusGPT")
 st.sidebar.title("SusGPT")
 
