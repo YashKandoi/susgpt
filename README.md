@@ -1,6 +1,7 @@
 # SusGPT: Where Sustainability is Answered
 
-The idea of SusGPT is to be the source of answers for the sustainability landscape in India. It draws on the database of climate action startups and functions like ChatGPT on climate steroids to build insights.
+The idea of SusGPT is to be the source of answers for the sustainability landscape in India. It draws on the database of climate action startups and functions like ChatGPT on climate steroids to build insights. The tool has been made in a manner that it is completely free to use and does not cost any money at this point, keeping in mind the goals and raising awareness on Sustainability.
+You can also read more about it's ideation and development on our Medium article here: https://medium.com/@yashkandoi2003/susgpt-where-sustainability-is-answered-738521eed997
 
 ### Demo Video to Run
 Since this is not hosted on any platform right now, we have developed this in local host. 
