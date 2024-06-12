@@ -10,19 +10,19 @@ And the steps are given below as well!
 
 ### Steps to Run:
 
-1. Clone Repository from Github in an IDE : https://github.com/YashKandoi/susgpt.git
+1. Clone Repository from Github in an IDE from https://github.com/YashKandoi/susgpt.git or Download Zip File.
 
-2. Adding API tokens from Hugging Face (it's free) [Get it here: https://huggingface.co/settings/tokens]
+3. Adding API tokens from Hugging Face (it's free) [Get it here: https://huggingface.co/settings/tokens]
     1. Generate a write token
     2. Go to ```susgpt/susgpt/hf_inference_api_key.txt```
     3. Paste this API token here
 
-3. Adding API tokens from JINA Embeddings (it's free) [Scroll down in this page and get it here: https://jina.ai/embeddings/]
+4. Adding API tokens from JINA Embeddings (it's free) [Scroll down in this page and get it here: https://jina.ai/embeddings/]
     1. Copy this token
     2. Go to ```susgpt/susgpt/jina_emb_api_key.txt```
     3. Paste this API token here
 
-4. Now open Termninal and run this:
+5. Now open Termninal and run this:
      ```pip install -r requirements.txt```
     This will take sometime and install all required libraries.
 
@@ -30,7 +30,7 @@ And the steps are given below as well!
     ```python3 manage.py runserver```
     This will start the backend server
 
-5. Now open another terminal and run this:
+6. Now open another terminal and run this:
 
     ```streamlit run frontend/Home.py ```
     This will start the frontend server and will open up SusGPT.
