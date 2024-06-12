@@ -25,7 +25,7 @@ And the steps are given below as well!
 5. Creating a virtual environment (optional)
    You can create a virtual env and choose to run you code on that. Open your terminal and do this:
    1. ```python3 -m venv .venv```
-   2. ```. .venv/bin/activate
+   2. ```. .venv/bin/activate```
 
 7. Now open Termninal and run this:
      ```pip install -r requirements.txt```
