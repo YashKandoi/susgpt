@@ -163,3 +163,5 @@ wrapt
 yarl
 zipp
 gunicorn
+psycopg2-binary
+dj-database-url
