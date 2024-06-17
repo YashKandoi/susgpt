@@ -164,5 +164,5 @@ wrapt
 yarl
 zipp
 gunicorn
-psycopg2-binary
+psycopg2
 dj-database-url
