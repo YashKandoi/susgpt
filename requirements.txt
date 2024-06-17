@@ -164,7 +164,7 @@ wrapt
 yarl
 zipp
 gunicorn
-psycopg2
+# psycopg2
 psycopg2-binary
 dj-database-url
 python-decouple
