@@ -14,7 +14,7 @@ website_list = website_list_response.json()
 # response = requests.post("http://127.0.0.1:8000/websites/", data=data)
 # print(response)
 
-companies=""
-for website in website_list:
-    companies+=website['company_name'] + ", "
-print(companies)
+# companies=""
+# for website in website_list:
+#     companies+=website['company_name'] + ", "
+# print(companies)
