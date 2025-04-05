@@ -2,6 +2,7 @@
 import os
 import logging
 from urllib.parse import urlparse
+import Chroma
 import requests
 from llama_index.llms.huggingface import HuggingFaceInferenceAPI
 from llama_index.embeddings.jinaai import JinaEmbedding
